@@ -2,6 +2,7 @@ const { Router } = require('express');
 // Importar todos los routers;
 // Ejemplo: const authRouter = require('./auth.js');
 const axios = require ('axios');
+const {Occupation , Character} = require('../db');
 
 const router = Router();
 
@@ -65,9 +66,10 @@ router.get('/occupations',async (req,res) => {
     const occupations = occupationsApi.data.map(el => el.occupation);
     const occEach = occupations.map(el => {
         for (let i = 0; i < el.length; i++) return el[i] })
+        console.log(occEach); // es el map de Occupations y me trae todas las ocupaciones una por una
         //console.log('for',occEach);
     occEach.forEach(el => {
-        Occupation.findOrCreate({
+        Occupation.findOrCreate({ // este método si encuentra algo no lo vuelve a crear
             where: {name: el}
         })
     });
@@ -76,6 +78,43 @@ router.get('/occupations',async (req,res) => {
     res.send(allOccupations);
 })
 
+// ****************************** POST ******************************
+router.post('/character', async (req, res) => {
+    let {
+        name,
+        nickname,
+        birthday,
+        image,
+        status,
+        createdInDb,
+        occupation     
+    } = req.body
 
+    let characterCreated = await Character.create({
+        name,
+        nickname,
+        birthday,
+        image,
+        status,
+        createdInDb  
+    })
+
+    let occupationDb = await Occupation.findAll({ where: { name: occupation} }) // occupation llega por body
+    characterCreated.addOccupation(occupationDb)
+    res.send('Personaje creado con exitos')
+})
+
+
+router.get('/characters/:id',async (req,res) =>{
+    const id = req.params.id;
+    //const {id} = req.params;
+    const charactersTotal = await getAllCharacters()
+    if (id){
+        let characterId = await charactersTotal.filter(el => el.id == id)
+        characterId.length ?
+        res.status(200).json(characterId) :
+        res.status(400).send('No encontre ese personaje')
+    }
+})
 
 module.exports = router;
