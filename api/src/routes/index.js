@@ -9,7 +9,7 @@ const router = Router();
 // Configurar los routers
 // Ejemplo: router.use('/auth', authRouter);
 
-// ****************************** Get API info ******************************
+// ****************************** Get API info /characters: ******************************
 const getApiInfo = async () => {
     const apiUrl = await axios.get('https://breakingbadapi.com/api/characters/');
     const apiInfo = await apiUrl.data.map(el => {
@@ -48,7 +48,7 @@ const getAllCharacters = async () => {
     return infoTotal
 }
 
-// ****************************** GET ******************************
+// ****************************** GET/characters?name="..."******************************
 router.get('/characters',async (req,res) => {
     const name = req.query.name 
     let charactersTotal = await getAllCharacters();
@@ -56,11 +56,13 @@ router.get('/characters',async (req,res) => {
         let characterName = await charactersTotal.filter( el => el.name.toLowerCase().includes(name.toLowerCase()));
         characterName.length ?
         res.status(200).send(characterName) :
-        res.status(404).send('No esta el personaje, Sorry');
+        res.status(404).send('No esta el personaje, sorry');
     } else {
         res.status(200).send(charactersTotal);
     }
 })
+
+// ****************************** GET/ocupaciones: ******************************
 router.get('/occupations',async (req,res) => {
     const occupationsApi = await axios.get('https://breakingbadapi.com/api/characters/');
     const occupations = occupationsApi.data.map(el => el.occupation);
@@ -78,14 +80,14 @@ router.get('/occupations',async (req,res) => {
     res.send(allOccupations);
 })
 
-// ****************************** POST ******************************
+// ****************************** POST/character: ******************************
 router.post('/character', async (req, res) => {
     let {
         name,
         nickname,
         birthday,
-        image,
         status,
+        image,
         createdInDb,
         occupation     
     } = req.body
@@ -104,7 +106,7 @@ router.post('/character', async (req, res) => {
     res.send('Personaje creado con exitos')
 })
 
-
+// ****************************** GET character/{idPersonaje} ******************************
 router.get('/characters/:id',async (req,res) =>{
     const id = req.params.id;
     //const {id} = req.params;
